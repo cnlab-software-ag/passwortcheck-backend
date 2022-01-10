@@ -1,5 +1,4 @@
 # Backend API for Passwortcheck
-----------------------------------------------------------------------------------------
 
 ## Content
 - The files included in this package resemble the backend api part of the [Passwortcheck](https://github.com/cnlab-software-ag/passwortcheck).
@@ -80,14 +79,12 @@
   ```
 
 
-----------------------------------------------------------------------------------------
 ## Preconditions
 - The backend functionality is implemented using PHP, therefore PHP support must be enabled for the used web server.
 - Results are persisted in a database to provide some statistics on performed checks. The current implementation is using MySQL, therfore MySQL must be installed (or a compatible product such as MariaDB).
 - There are no special features used (neither from PHP nor from MySQL), therefore any version should work. However, it is suggested to use the most recent version of both products.
 
 
-----------------------------------------------------------------------------------------
 ## Database
 
 ### Supported databases
@@ -126,7 +123,6 @@ The DB schema consists of two tables, one for storing results, one for tracking 
   ```
 
 
-----------------------------------------------------------------------------------------
 ## Configuration
 - In order to get the backend API working properly, some configuration settings are required.
 - All configuration parameter can be defined in environement variables, the PHP scripts will automatically use the settings.
