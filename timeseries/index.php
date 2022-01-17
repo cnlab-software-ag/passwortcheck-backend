@@ -10,6 +10,9 @@
   $db_user = getenv("DB_USERNAME");
   $db_pass = getenv("DB_PASSWORD");
 
+  // number of days
+  $num_days = 366;
+
 // no changes below -----------------------------------------------------------------------------------------------------------------------
 header('Content-Type: application/json; charset=utf-8');
 if (in_array($_SERVER["HTTP_ORIGIN"], explode(",", $allowedOrigins))) {
@@ -22,29 +25,42 @@ if (in_array($_SERVER["HTTP_ORIGIN"], explode(",", $allowedOrigins))) {
 
 $checks = Array("checks" => Array());
 $total = 0;
+
 $db = new mysqli($db_host, $db_user, $db_pass, $db_name);
 
-for($i=0;$i<365;$i++) {
-  $query = "select date_format(date_sub(now(), interval $i day), '%Y-%m-%d') as date from dual";
-  $res = $db->query($query);
-  $date = $res->fetch_assoc()['date'];
+$query  = "select A.date, B.count as weak, C.count as strong from (";
+$query .= "  select a.date from ( ";
+$query .= "    select date_format(now() - INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY, '%Y-%m-%d') as date from ( ";
+$query .= "      select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all select 5 union all ";
+$query .= "         select 6 union all select 7 union all select 8 union all select 9) as a ";
+$query .= "      cross join (select 0 as a union all select 1 union all select 2 union all select 3 union all select 4 union all ";
+$query .= "         select 5 union all select 6 union all select 7 union all select 8 union all select 9) as b ";
+$query .= "      cross join (select 0 as a union all select 1 union all select 2 union all select 3) as c ";
+$query .= "    ) a ";
+$query .= "    where a.date between now() - INTERVAL ${num_days} DAY and now() ";
+$query .= "    order by date ";
+$query .= ") A ";
+$query .= "left join ( ";
+$query .= "  select date_format(timestamp, '%Y-%m-%d') as date, count(*) as count from results where result = 0 group by date ";
+$query .= ") B ";
+$query .= "on A.date = B.date ";
+$query .= "left join ( ";
+$query .= "  select date_format(timestamp, '%Y-%m-%d') as date, count(*) as count from results where result = 1 group by date ";
+$query .= ") C ";
+$query .= "on A.date = C.date ";
+$query .= "order by date;";
 
-  $checks["checks"][$date] = Array();
-  $checks["checks"][$date]["id"] = $date;
-
-  $query = "select result, count(*) as num from results where timestamp >= '$date 00:00:00' and timestamp <= '$date 23:59:59' group by result";
-  $res = $db->query($query);
-  $total = 0;
-  $data = [0, 0];
-  if ($res->num_rows > 0) {
-    foreach($res as $row) {
-      $total += $row['num'];
-      $val = intval($row['result']);
-      $data[$val] = intval($row['num']);
-    }
+$res = $db->query($query);
+if ($res->num_rows > 0) {
+  foreach($res as $row) {
+    $date = $row['date'];
+    $weak = intval($row['weak']);
+    $strong = intval($row['strong']);
+    $checks["checks"][$date] = Array();
+    $checks["checks"][$date]["id"] = $date;
+    $checks["checks"][$date]["data"] = [$weak, $strong];
+    $checks["checks"][$date]["checkTotal"] = $weak + $strong;
   }
-  $checks["checks"][$date]["data"] = $data;
-  $checks["checks"][$date]["checkTotal"] = intval($total);
 }
 
 $db->close();
