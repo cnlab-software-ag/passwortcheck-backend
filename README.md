@@ -2,7 +2,7 @@
 
 ## Content
 - The files included in this package resemble the backend api part of the [Passwortcheck](https://github.com/cnlab-software-ag/passwortcheck).
-- The backend api curerntly provides three endpoints: one for submitting results, and two separate endpoints to query statistical information about recorded results.
+- The backend api currently provides three endpoints: one for submitting results, and two separate endpoints to query statistical information about recorded results.
 - **/results/index.php**: Endpoint to upload the result of a password check.
 - **/statistics/index.php**
   - Endpoint providing statistics about performed checks in four different intervals (last day, last week, last month, last year).
